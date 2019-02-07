@@ -1,7 +1,9 @@
 # Connectome Visualizer
 
 <p align="center">
-  <img align="middle" src="./ex.png" alt="visualization" width="300" height="300" />
+  	<img align="middle" src="./ex.png" alt="visualization" width="300" height="300" />
+	<img align="middle" src="./ex2.png" alt="visualization" width="300" height="300" />
+	<img align="middle" src="./ex3.png" alt="visualization" width="300" height="300" />
 </p>
 
 ## Installation
