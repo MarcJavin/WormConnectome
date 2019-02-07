@@ -8,7 +8,7 @@
 
 ## Installation
 
-- Install Python and [jupyter notebook] (https://jupyter.org/install)
+- Install Python and [jupyter notebook](https://jupyter.org/install)
 - Download :
 
 ```
