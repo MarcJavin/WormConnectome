@@ -14,6 +14,7 @@
 ```
 git clone https://github.com/MarcusJP/WormConnectome.git
 ```
+(or just download the .zip)
 
 - Install the libraries :
 
