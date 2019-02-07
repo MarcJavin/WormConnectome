@@ -1,7 +1,7 @@
 # Connectome Visualizer
 
 <p align="center">
-  <img align="middle" src="./ex.png" alt="visualization" width="240" height="330" />
+  <img align="middle" src="./ex.png" alt="visualization" width="300" height="300" />
 </p>
 
 ## Installation
@@ -26,6 +26,8 @@ pip install numpy pandas networkx matplotlib ipywidgets
 ```
 jupyter notebook
 ```
+
+- Open Connectome Visualizer.ipynb
 
 - Press SHIFT + ENTER to run the cells
 
