@@ -1,11 +1,12 @@
 # Connectome Visualizer
 
-- Inividual neural connections
+- Individual neural connections
 <p align="center">
   	<img align="middle" src="./img/ex.png" alt="visualization" width="250" height="250" />
 	<img align="middle" src="./img/ex2.png" alt="visualization" width="250" height="250" />
 	<img align="middle" src="./img/ex3.png" alt="visualization" width="250" height="250" />
 </p>
+
 - Whole connectome visualization
 <p align="center">
   	<img align="middle" src="./img/circ.png" alt="visualization" width="450" height="300" />
