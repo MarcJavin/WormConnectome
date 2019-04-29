@@ -1,3 +1,10 @@
+"""
+.. module:: single_conn
+    :synopsis: Module for visualization of C. Elegans' neural connections with a GUI
+
+.. moduleauthor:: Marc Javin
+"""
+
 import pandas as pd
 import numpy as np
 import networkx as nx
