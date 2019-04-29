@@ -30,7 +30,7 @@ pip install numpy pandas networkx matplotlib ipywidgets
 
 ## Usage
 
-### Single neurons visualization
+### GUI for single neurons visualization
 
 - Run the following command :
 
