@@ -25,7 +25,7 @@ git clone https://github.com/MarcusJP/WormConnectome.git
 - Install the libraries :
 
 ```
-pip install numpy pandas networkx matplotlib ipywidgets
+pip install numpy pandas networkx matplotlib ipywidgets pyqt5
 ```
 
 ## Usage
