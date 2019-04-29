@@ -30,6 +30,16 @@ pip install numpy pandas networkx matplotlib ipywidgets
 
 ## Usage
 
+### Single neurons visualization
+
+- Run the following command :
+
+```
+python3 single_conn.py
+```
+
+### Single neurons and whole circuit with jupyter notebook
+
 - Launch in the folder :
 
 ```
