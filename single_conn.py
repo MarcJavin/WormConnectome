@@ -92,15 +92,15 @@ class App:
         self.neur.set("BAGL")
 
         w = Combobox(master, textvariable=self.neur, values=options)
+        w.bind("<<ComboboxSelected>>", self.draw)
         w.pack()
-        
-        button = Button(master, text="Let's go !", command=self.draw)
-        button.pack()
 
-    def draw(self):
+    def draw(self, event=None):
         plt.clf()
         connections(self.neur.get())
         self.canvas.draw()
+
+        
         
 
 root = Tk()
