@@ -108,18 +108,29 @@ class Visu(QVBoxLayout):
         connections(self.cb.currentText())
         self.canvas.draw()
 
+    def delete(self):
+        self.setParent(None)
+        self.cb.setParent(None)
+        self.canvas.setParent(None)
+
 class Window(QWidget):
 
     def __init__(self):
         super(Window, self).__init__()
 
+        self.neurons = []
         layout = QVBoxLayout()
         self.visu_layout = QHBoxLayout()
 
         self.b1 = QPushButton("Add neuron")
         self.b1.clicked.connect(self.add_visu)
+        self.b2 = QPushButton("Remove neuron")
+        self.b2.clicked.connect(self.remove_visu)
 
-        layout.addWidget(self.b1)
+        subl = QHBoxLayout()
+        subl.addWidget(self.b1)
+        subl.addWidget(self.b2)
+        layout.addLayout(subl)
         self.visu_layout.addLayout(Visu())
         layout.addLayout(self.visu_layout)
         self.setLayout(layout)
@@ -129,8 +140,13 @@ class Window(QWidget):
         self.setWindowTitle("Connectome Visualizer")
 
     def add_visu(self):
-        self.visu_layout.addLayout(Visu())
+        self.neurons.append(Visu())
+        self.visu_layout.addLayout(self.neurons[-1])
 
+    def remove_visu(self):
+        self.neurons[-1].delete()
+        self.visu_layout.removeItem(self.neurons[-1])
+        self.neurons.pop()
 
 app = QApplication(sys.argv)
 w = Window()
