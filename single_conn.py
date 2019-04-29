@@ -82,7 +82,7 @@ from matplotlib.backends.backend_tkagg import (
 
 class App:
 
-    def __init__(self, master, img_size=10):
+    def __init__(self, master, img_size=6):
         fig = plt.figure(figsize=(img_size,img_size))
         self.canvas = FigureCanvasTkAgg(fig, master=master)  # A tk.DrawingArea.
         self.canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=True)
