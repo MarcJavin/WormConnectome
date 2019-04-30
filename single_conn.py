@@ -5,16 +5,19 @@
 .. moduleauthor:: Marc Javin
 """
 
+from os.path import dirname
+HERE = dirname(__file__)
+
 import pandas as pd
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.patches import ArrowStyle
 
-dfs = pd.read_csv('data/Neuro279_Syn.csv', index_col=0)
-dfg = pd.read_csv('data/Neuro279_EJ.csv', index_col=0)
+dfs = pd.read_csv(HERE+'/data/Neuro279_Syn.csv', index_col=0)
+dfg = pd.read_csv(HERE+'/data/Neuro279_EJ.csv', index_col=0)
     
-dfcat = pd.read_csv('data/neuron_categories.csv', index_col=1, header=0)
+dfcat = pd.read_csv(HERE+'/data/neuron_categories.csv', index_col=1, header=0)
 nbs = [i for i in range(len(dfs.index))]
 cats = dfcat.loc[dfg.index]
 motors = cats.index[cats['Category']=='MOTOR']
@@ -36,6 +39,7 @@ styleg = ArrowStyle("wedge", tail_width=0.6, shrink_factor=0.4)
 
 
 def connections(neuron='BAGL'):
+    '''Prepare graph for plotting'''
     G = nx.DiGraph()
     
     syn_in = dfs.index[dfs[neuron] > 0].tolist()
@@ -76,6 +80,7 @@ def connections(neuron='BAGL'):
     nx.draw_networkx_edges(G, pos, arrowstyle=style, edgelist=syno, edge_color='r',
                            arrowsize=10, alpha=0.5, width=intens_out, node_size=NODE_SIZE)
     plt.axis('off')
+    return pos
 
 
 
@@ -89,6 +94,22 @@ class Visu(QVBoxLayout):
 
     nb = 0
 
+    @staticmethod
+    def mousePressEvent(event, self):
+        '''Put clicked neuron on the center'''
+        X = self.canvas.width()
+        Y = self.canvas.height()
+        x = (event.pos().x() * 6 / X) - 3
+        y = - (event.pos().y() * 6 / Y) + 3
+        p = np.array([[x, y]])
+        nodes = np.array(list(self.pos.values()))
+        dist = np.sum((nodes - p)**2, axis=1)
+        close = np.argmin(dist)
+        print(dist[close])
+        if dist[close] < 0.2:
+            neur = list(self.pos.keys())[close]        
+            self.draw(neur=neur)
+
     def __init__(self, img_size=12):
         super(Visu, self).__init__()
 
@@ -96,6 +117,8 @@ class Visu(QVBoxLayout):
         self.nb = Visu.nb
         self.figure = plt.figure(self.nb, figsize=(img_size,img_size))
         self.canvas = FigureCanvas(self.figure)
+        self.canvas.setMouseTracking(True)
+        self.canvas.mousePressEvent = lambda e: Visu.mousePressEvent(e, self)
 
         subl = QHBoxLayout()
         self.cb = QComboBox()
@@ -109,16 +132,23 @@ class Visu(QVBoxLayout):
         subl.addStretch()
         self.addLayout(subl)
 
-    def draw(self, event=None):
+        self.pos = None
+
+    def draw(self, i=None, neur=None):
+        '''Draw with @neur in the center'''
         self.figure.clf()
         plt.figure(self.nb)
-        connections(self.cb.currentText())
+        if neur is None:
+            neur = self.cb.currentText()
+        self.pos = connections(neur)
         self.canvas.draw()
 
-    def delete(self):
+    def delete(self):   
+        '''Delete slot'''
         self.setParent(None)
         self.cb.setParent(None)
         self.canvas.setParent(None)
+
 
 class Window(QWidget):
 
@@ -129,9 +159,9 @@ class Window(QWidget):
         layout = QVBoxLayout()
         self.visu_layout = QHBoxLayout()
 
-        self.b1 = QPushButton("Add neuron")
+        self.b1 = QPushButton("Add slot")
         self.b1.clicked.connect(self.add_visu)
-        self.b2 = QPushButton("Remove neuron")
+        self.b2 = QPushButton("Remove slot")
         self.b2.clicked.connect(self.remove_visu)
 
         subl = QHBoxLayout()
@@ -155,8 +185,11 @@ class Window(QWidget):
         self.visu_layout.removeItem(self.neurons[-1])
         self.neurons.pop()
 
-app = QApplication(sys.argv)
-w = Window()
-w.show()
-sys.exit(app.exec_())
+
+if __name__=='__main__':
+
+    app = QApplication(sys.argv)
+    w = Window()
+    w.show()
+    sys.exit(app.exec_())
 
