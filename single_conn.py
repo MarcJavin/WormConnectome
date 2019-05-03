@@ -122,9 +122,13 @@ class Visu(QVBoxLayout):
 
         subl = QHBoxLayout()
         self.cb = QComboBox()
-        self.cb.addItems(sorted(dfs.index))
+        
         self.cb.currentIndexChanged.connect(self.draw)
+        self.cb.addItems(sorted(dfs.index))
         self.cb.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.cb.view().setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.cb.view().window().setMaximumHeight(400)
+        
 
         self.addWidget(self.canvas)
         subl.addStretch()
