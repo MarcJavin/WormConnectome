@@ -6,7 +6,7 @@
 """
 
 from os.path import dirname
-HERE = '.'
+HERE = dirname(__file__)
 
 import pandas as pd
 import numpy as np
