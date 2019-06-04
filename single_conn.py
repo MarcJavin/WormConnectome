@@ -6,7 +6,7 @@
 """
 
 from os.path import dirname
-HERE = dirname(__file__)
+HERE = '.'
 
 import pandas as pd
 import numpy as np
@@ -36,9 +36,10 @@ NODE_SIZE = 2500
 
 style = ArrowStyle("wedge", tail_width=2., shrink_factor=0.2)
 styleg = ArrowStyle("wedge", tail_width=0.6, shrink_factor=0.4)
+CONN_STYLE = 'arc3, rad=0.3'
 
 
-def connections(neuron='BAGL'):
+def connections(neuron='BAGL', connstyle=CONN_STYLE):
     '''Prepare graph for plotting'''
     G = nx.DiGraph()
     
@@ -72,15 +73,16 @@ def connections(neuron='BAGL'):
 
     nx.draw_networkx_labels(G, pos, font_color='w', font_weight='bold')
     
-    nx.draw_networkx_edges(G, pos, arrowstyle=style, edgelist=syni, edge_color='g',
+    nx.draw_networkx_edges(G, pos, arrowstyle=style, edgelist=syni, edge_color='g', connectionstyle=connstyle,
                            arrowsize=10, alpha=0.7, width=intens_in, node_size=NODE_SIZE)
+    nx.draw_networkx_edges(G, pos, arrowstyle=style, edgelist=syno, edge_color='r', connectionstyle=connstyle,
+                           arrowsize=10, alpha=0.5, width=intens_out, node_size=NODE_SIZE)
     nx.draw_networkx_edges(G, pos, arrowstyle=styleg, edgelist=gaps, edge_color='Gold',
                            arrowsize=10, alpha=0.8, width=np.hstack((intens_g,intens_g)), 
                            node_size=NODE_SIZE)
-    nx.draw_networkx_edges(G, pos, arrowstyle=style, edgelist=syno, edge_color='r',
-                           arrowsize=10, alpha=0.5, width=intens_out, node_size=NODE_SIZE)
     plt.axis('off')
     return pos
+
 
 
 
@@ -91,9 +93,59 @@ from PyQt5.QtCore import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 class Visu(QVBoxLayout):
+    '''Layout for one neuron visualization'''
 
     nb = 0
 
+    def __init__(self, img_size=12):
+        super(Visu, self).__init__()
+
+        Visu.nb += 1
+        self.nb = Visu.nb
+        # Figure and mouse clicking
+        self.figure = plt.figure(self.nb, figsize=(img_size,img_size))
+        self.canvas = FigureCanvas(self.figure)
+        self.canvas.setMouseTracking(True)
+        self.canvas.mousePressEvent = lambda e: Visu.mousePressEvent(e, self)
+
+        subl = QHBoxLayout()
+        
+        '''List of neurons'''
+        self.cb = QComboBox()
+        self.cb.addItems(sorted(dfs.index))
+        self.cb.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.cb.view().setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.cb.view().window().setMaximumHeight(400)
+        
+        '''Style option'''
+        self.style = QCheckBox('Curved')
+        self.style.setChecked(True)
+        
+        self.cb.currentIndexChanged.connect(lambda x: self.draw())
+        self.style.stateChanged.connect(lambda x: self.draw())
+        
+        '''Add everything in layout'''
+        self.addWidget(self.canvas)
+        subl.addStretch()
+        subl.addWidget(self.cb)
+        subl.addWidget(self.style)
+        subl.addStretch()
+        self.addLayout(subl)
+
+        self.pos = None
+        self.draw()
+
+    def draw(self, neur=None, style=None):
+        '''Draw with @neur in the center'''
+        self.figure.clf()
+        plt.figure(self.nb)
+        if neur is None:
+            neur = self.cb.currentText()
+        if self.style.isChecked():
+            style = CONN_STYLE
+        self.pos = connections(neur, style)
+        self.canvas.draw()
+        
     @staticmethod
     def mousePressEvent(event, self):
         '''Put clicked neuron on the center'''
@@ -105,56 +157,20 @@ class Visu(QVBoxLayout):
         nodes = np.array(list(self.pos.values()))
         dist = np.sum((nodes - p)**2, axis=1)
         close = np.argmin(dist)
-        print(dist[close])
         if dist[close] < 0.2:
             neur = list(self.pos.keys())[close]        
             self.draw(neur=neur)
-
-    def __init__(self, img_size=12):
-        super(Visu, self).__init__()
-
-        Visu.nb += 1
-        self.nb = Visu.nb
-        self.figure = plt.figure(self.nb, figsize=(img_size,img_size))
-        self.canvas = FigureCanvas(self.figure)
-        self.canvas.setMouseTracking(True)
-        self.canvas.mousePressEvent = lambda e: Visu.mousePressEvent(e, self)
-
-        subl = QHBoxLayout()
-        self.cb = QComboBox()
-        
-        self.cb.currentIndexChanged.connect(self.draw)
-        self.cb.addItems(sorted(dfs.index))
-        self.cb.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.cb.view().setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.cb.view().window().setMaximumHeight(400)
-        
-
-        self.addWidget(self.canvas)
-        subl.addStretch()
-        subl.addWidget(self.cb)
-        subl.addStretch()
-        self.addLayout(subl)
-
-        self.pos = None
-
-    def draw(self, i=None, neur=None):
-        '''Draw with @neur in the center'''
-        self.figure.clf()
-        plt.figure(self.nb)
-        if neur is None:
-            neur = self.cb.currentText()
-        self.pos = connections(neur)
-        self.canvas.draw()
 
     def delete(self):   
         '''Delete slot'''
         self.setParent(None)
         self.cb.setParent(None)
+        self.style.setParent(None)
         self.canvas.setParent(None)
 
 
 class Window(QWidget):
+    '''Main window containing potentially several visualisations'''
 
     def __init__(self):
         super(Window, self).__init__()
@@ -163,6 +179,7 @@ class Window(QWidget):
         layout = QVBoxLayout()
         self.visu_layout = QHBoxLayout()
 
+        '''Buttons to add or remove slots'''
         self.b1 = QPushButton("Add slot")
         self.b1.clicked.connect(self.add_visu)
         self.b2 = QPushButton("Remove slot")
@@ -181,10 +198,12 @@ class Window(QWidget):
         self.setWindowTitle("Connectome Visualizer")
 
     def add_visu(self):
+        '''Add neuron visalization'''
         self.neurons.append(Visu())
         self.visu_layout.addLayout(self.neurons[-1])
 
     def remove_visu(self):
+        '''Remove last neuron visualization'''
         self.neurons[-1].delete()
         self.visu_layout.removeItem(self.neurons[-1])
         self.neurons.pop()
